@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Juego de Click - Niveles y Dinero</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@600&display=swap');
+  
+  * {
+    box-sizing: border-box;
+  }
+  
+  body {
+    margin: 0;
+    background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+    font-family: 'Poppins', sans-serif;
+    color: #00ffb7;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100vh;
+    justify-content: center;
+    overflow: hidden;
+  }
+  
+  header {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    background: #11141fdd;
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    font-size: 1.6rem;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    box-shadow: 0 0 10px #00ffb7;
+  }
+  
+  #dinero {
+    color: #00ffa4;
+  }
+  #nivel {
+    color: #00ffa4;
+  }
+  
+  main {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 25px;
+  }
+  
+  #clickBtn {
+    background: #00ffb7;
+    border: none;
+    border-radius: 20px;
+    padding: 40px 80px;
+    font-size: 3rem;
+    color: #002211;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 0 20px #00ffb7aa;
+    transition: transform 0.1s ease, box-shadow 0.3s ease;
+    user-select: none;
+  }
+  #clickBtn:hover {
+    box-shadow: 0 0 30px #00ffb7ff, 0 0 60px #00ffb7cc;
+  }
+  #clickBtn:active {
+    transform: scale(0.9);
+    box-shadow: 0 0 15px #00cc8c;
+  }
+  
+  #resetBtn {
+    background: transparent;
+    border: 2px solid #00ffb7;
+    border-radius: 15px;
+    padding: 10px 25px;
+    font-size: 1.1rem;
+    color: #00ffb7;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background-color 0.3s ease;
+    user-select: none;
+  }
+  #resetBtn:hover {
+    background-color: #00ffb755;
+  }
+
+  #nivelBtn {
+    background: #ffbf00;
+    border: none;
+    border-radius: 20px;
+    padding: 20px 50px;
+    font-size: 1.8rem;
+    color: #000;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 0 15px #ffbf00cc;
+    user-select: none;
+    display: none;
+    transition: background-color 0.3s ease;
+  }
+  #nivelBtn:hover {
+    background-color: #ffd44d;
+  }
+  
+  #dineroGanado {
+    position: absolute;
+    font-weight: 900;
+    font-size: 2.8rem;
+    color: #00ffb7cc;
+    top: 55%;
+    pointer-events: none;
+    opacity: 0;
+    user-select: none;
+    animation: subirDinero 1s ease forwards;
+  }
+  
+  @keyframes subirDinero {
+    0% {
+      opacity: 1;
+      transform: translateY(0) scale(1.4);
+    }
+    100% {
+      opacity: 0;
+      transform: translateY(-120px) scale(1);
+    }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div>Nivel: <span id="nivel">1</span></div>
+  <div>Dinero: $<span id="dinero">0</span></div>
+</header>
+
+<main>
+  <button id="clickBtn">¡Haz Click!</button>
+  <button id="resetBtn">Reiniciar Dinero</button>
+  <button id="nivelBtn">Pasar al Nivel 2</button>
+</main>
+
+<script>
+  const dineroDisplay = document.getElementById('dinero');
+  const nivelDisplay = document.getElementById('nivel');
+  const clickBtn = document.getElementById('clickBtn');
+  const resetBtn = document.getElementById('resetBtn');
+  const nivelBtn = document.getElementById('nivelBtn');
+
+  const metasNiveles = [
+    50, 100, 150, 200, 250, 300, 350, 400, 450, 700,
+    800, 1000, 4000, 4700, 7000
+  ];
+
+  let dinero = 0;
+  let nivel = 1;
+
+  function actualizarUI() {
+    dineroDisplay.textContent = dinero.toFixed(2);
+    nivelDisplay.textContent = nivel;
+
+    if (nivel < metasNiveles.length && dinero >= metasNiveles[nivel - 1]) {
+      nivelBtn.style.display = 'inline-block';
+      nivelBtn.textContent = `Pasar al Nivel ${nivel + 1}`;
+    } else {
+      nivelBtn.style.display = 'none';
+    }
+  }
+
+  function animarDineroGanado(x, y, cantidad) {
+    const anim = document.createElement('div');
+    anim.id = 'dineroGanado';
+    anim.textContent = `+$${cantidad}`;
+    anim.style.left = `${x}px`;
+    anim.style.top = `${y}px`;
+    document.body.appendChild(anim);
+    anim.addEventListener('animationend', () => {
+      anim.remove();
+    });
+  }
+
+  clickBtn.addEventListener('click', () => {
+    const ganancia = nivel; // ganancias multiplicadas por nivel
+    dinero += ganancia;
+    actualizarUI();
+
+    const rect = clickBtn.getBoundingClientRect();
+    const x = rect.left + rect.width / 2 + (Math.random() * 100 - 50);
+    const y = rect.top + rect.height / 2 + (Math.random() * 40 - 20);
+    animarDineroGanado(x, y, ganancia);
+  });
+
+  resetBtn.addEventListener('click', () => {
+    dinero = 0;
+    nivel = 1;
+    actualizarUI();
+  });
+
+  nivelBtn.addEventListener('click', () => {
+    if (nivel < metasNiveles.length && dinero >= metasNiveles[nivel - 1]) {
+      // Quitar la cantidad necesaria para subir nivel
+      dinero -= metasNiveles[nivel - 1];
+      nivel++;
+      actualizarUI();
+    }
+  });
+
+  actualizarUI();
+</script>
+
+</body>
+</html>
